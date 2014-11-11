@@ -1,0 +1,47 @@
+body{
+    margin: 0;
+    padding:0;
+}
+.container-custom{
+    float: left;
+    width:100%;
+
+}
+
+.container-center{
+    margin: auto;
+    width: 900px;
+    margin-top: 20px;
+    border: 1px solid #000000;
+}
+
+.overall-margin{
+    margin: 10px;
+}
+
+.border{
+    border: 1px solid #000000;
+}
+
+.bottom-text
+{
+    width: 100%;
+    float: left;
+}
+
+.inner-container
+{
+    min-height: 200px;
+    width: 100%;
+    float: left;
+
+}
+.col-lg-6
+{
+   width: 47.5% !important;
+}
+
+.mrg
+{
+    margin-top: 5px;
+}
