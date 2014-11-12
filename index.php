@@ -5,6 +5,7 @@
     <link   rel="stylesheet" type="text/css" href="./css/css.css">
     <link   rel="stylesheet" type="text/css" href="./css/bootstrap.min.css">
     <script src="libs/jquery-2.1.0.min.js" type="text/javascript"></script>
+    <script src="libs/gup.js" type="text/javascript"></script>
     <script type="text/javascript" src="./js/script.js"></script>
 
 </header>

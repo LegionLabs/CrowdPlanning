@@ -9,8 +9,6 @@
  * Time: 12:04 AM
  */
 
-
-
 include_once('./php/_db.php');
 
 $action = $_REQUEST['action'];
@@ -24,8 +22,6 @@ if(!empty($action)){
             user_action_save();
             break;
 
-
-
     }
 
 }else{
@@ -33,6 +29,10 @@ if(!empty($action)){
     json_response(true,'Action missing please provide action');
 
 }
+
+/*
+ * global json response for every function
+ */
 
 function json_response($error,$msg){
 
@@ -54,6 +54,7 @@ function user_action_save(){
 
     $length    = 50;
     $action    = $_REQUEST['value'];
+    $session   = $_REQUEST['session'];
     $user_hash = md5('somehash');
     $date      = strtotime(date('H:i:s')) ;
 
@@ -63,22 +64,31 @@ function user_action_save(){
 
         if( strlen($action) > $length ){
 
-            json_response(true,'Max lenth allowed '.$length);
+            json_response(true,'Max length allowed :'.$length);
 
         }
 
-        $sth = $db->prepare("INSERT INTO actions (action_name, action_datetime, action_status, action_userid) VALUES(:action_name,:action_datetime,:action_status,:action_userid)");
-        $result = $sth->execute(array(':action_name' => $action, ':action_datetime' => $date, ':action_status' => 1, ':action_userid' => $user_hash));
+        $user_id = getUserid($session);
 
-        if($result){
+        if($user_id != false){
 
-            $data = get_user_actions($user_hash);
-            json_response(false,$data);
+            $sth = $db->prepare("INSERT INTO actions (action_name, action_datetime, action_status, action_userid) VALUES(:action_name,:action_datetime,:action_status,:action_userid)");
+            $result = $sth->execute(array(':action_name' => $action, ':action_datetime' => $date, ':action_status' => 1, ':action_userid' => $user_id));
 
+            if($result){
+
+                $data = get_user_actions($user_id);
+                json_response(false,$data);
+
+            }
+
+        }else{
+            json_response(true,'user sessions doesnt exists!');
         }
+
 
     }else{
-        json_response(true,'value missing please provide value');
+        json_response(true,'value missing please provide value!');
     }
 
 }
@@ -94,15 +104,15 @@ function connection(){
 }
 
 /*
- * Get user actions based on provided session hash
+ * function to get id of the user
  */
 
-function get_user_actions($user_hash){
+function getUserid($session){
 
     $db = connection();
 
-    $sth = $db->prepare("SELECT * FROM actions WHERE action_userid=:sessionName LIMIT 30");
-    $sth->execute(array(':sessionName'=>$user_hash));
+    $sth = $db->prepare("SELECT * FROM users WHERE user_hash=:hash_code LIMIT 1");
+    $sth->execute(array(':hash_code'=>$session));
 
     $data =  array();
 
@@ -112,6 +122,35 @@ function get_user_actions($user_hash){
         $data[] = $row;
 
     }
+
+    if(is_array($data) && isset($data[0]['user_id'])){
+        return $data[0]['user_id'];
+    }else{
+        return false;
+    }
+
+
+}
+
+/*
+ * Get user actions based on provided session hash
+ */
+
+function get_user_actions($userid){
+
+    $db = connection();
+
+    $sth = $db->prepare("SELECT * FROM actions WHERE action_userid=:sessionName LIMIT 30");
+    $sth->execute(array(':sessionName'=>$userid));
+
+    $data =  array();
+
+        while (false !== ($row = $sth->fetch(PDO::FETCH_ASSOC, $cursor))) {
+
+            $cursor = PDO::FETCH_ORI_NEXT;
+            $data[] = $row;
+
+        }
 
     return $data;
 

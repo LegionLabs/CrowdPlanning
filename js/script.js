@@ -30,7 +30,7 @@ function add_new_action(){
     $.ajax({
         url: "ajax_requests.php",
         type: "POST",
-        data : { 'action' : 'save_action' , 'value' : suggested_value  },
+        data : { 'action' : 'save_action' , 'value' : suggested_value , 'session' :gup('session')  },
         context: document.body,
         cache: false,
         async: false,
