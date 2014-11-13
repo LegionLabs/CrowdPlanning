@@ -50,7 +50,7 @@
             </div>
 
             <div class="col-lg-6 col-sm-6 col-xs-6 border overall-margin">
-                <div class="inner-container">
+                <div class="inner-container" id="right-bottom">
 
                 </div>
                 <div class="bottom-text">
@@ -59,8 +59,9 @@
 
                     <p class="mrg">
 
-                        <input type="button" value="Add" id="add_new" class="btn btn-success"/>
-                        <input type="button" id="suggest_new" value="Suggest new action" class="btn btn-success"/>
+<!--                        <input type="button" value="Add" id="add_new" class="btn btn-success"/>-->
+<!--                        <input type="button" id="suggest_new" value="Suggest new action" class="btn btn-success"/>-->
+                        <input type="button" id="add_new" value="Suggest new action" class="btn btn-success"/>
 
                     </p>
                 </div>
