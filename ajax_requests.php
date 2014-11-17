@@ -11,6 +11,8 @@
 
 include_once('./php/_db.php');
 
+date_default_timezone_set('America/New_York');
+
 $action = $_REQUEST['action'];
 $action = 'save_action';
 
