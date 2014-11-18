@@ -11,6 +11,8 @@
 
 include_once('./php/_db.php');
 
+date_default_timezone_set('America/New_York');
+
 $action = $_REQUEST['action'];
 
 
@@ -55,17 +57,22 @@ function json_response($error,$msg){
     die;
 }
 
+
 /*
  * function to save value inserted by the user for action
  */
-
 function user_action_save(){
 
-    $length    = 50;
-    $action    = $_REQUEST['value'];
-    $session   = $_REQUEST['session'];
-    $user_hash = md5('somehash');
-    $date      = strtotime(date('H:i:s')) ;
+    $length      = 50;
+    $action      = $_REQUEST['value'];
+    $user_name   = $_REQUEST['user'];
+    $date        = strtotime(date('H:i:s')) ;
+
+    if( isset($_REQUEST['user']) ) {
+        $user_name = $_REQUEST['user'];
+    }else {
+        $user_name = 'DEFAULT';
+    }
 
     if(!empty($action)){
 
@@ -77,24 +84,26 @@ function user_action_save(){
 
         }
 
-        $user_id = getUserid($session);
+        /*
+                $user_id = getUserid($session);
 
-        if($user_id != false){
+                if($user_id != false){
+
+                }else{
+                    json_response(true,'user sessions doesnt exists!');
+                }
+        */
+
 
             $sth = $db->prepare("INSERT INTO actions (action_name, action_datetime, action_status, action_userid) VALUES(:action_name,:action_datetime,:action_status,:action_userid)");
-            $result = $sth->execute(array(':action_name' => $action, ':action_datetime' => $date, ':action_status' => 0, ':action_userid' => $user_id));
+            $result = $sth->execute(array(':action_name' => $action, ':action_datetime' => $date, ':action_status' => 0, ':action_userid' => $user_name));
 
             if($result){
 
-                $data = get_user_actions($user_id,0);
+                $data = get_user_actions($user_name,0);
                 json_response(false,$data);
 
             }
-
-        }else{
-            json_response(true,'user sessions doesnt exists!');
-        }
-
 
     }else{
         json_response(true,'value missing please provide value!');
@@ -109,37 +118,33 @@ function user_action_save_step2(){
 
     $length    = 50;
     $action    = $_REQUEST['value'];
-    $session   = $_REQUEST['session'];
+    $session   = $_REQUEST['user'];
     $date      = strtotime(date('H:i:s')) ;
 
     if(!empty($action)){
 
-        $db = connection();
+        $db      = connection();
 
-        $user_id = getUserid($session);
-
-        if($user_id != false){
+        if( isset($_REQUEST['user']) ) {
+            $user_name = $_REQUEST['user'];
+        }else {
+            $user_name = 'DEFAULT';
+        }
 
             $sth = $db->prepare("UPDATE actions set action_status = :status where action_id = :action_id_passed");
             $result = $sth->execute(array(':status' => 1, ':action_id_passed' => $action));
 
             if($result){
 
-                $data = get_user_actions($user_id,1);
+                $data = get_user_actions($user_name,1);
                 json_response(false,$data);
-
             }
-
-        }else{
-            json_response(true,'user sessions doesnt exists!');
-        }
 
 
     }else{
-        json_response(true,'value missing please provide value!');
+            json_response(true,'value missing please provide value!');
+        }
     }
-
-}
 
 
 /*
@@ -152,10 +157,11 @@ function connection(){
 
 }
 
+
+// WSL-TODO: Instead of getting the userID based on prior sessions (so that we can recover previously-added actions), let's try to get all prior sessions that were created for/by that user. Note that this might require us to use BOTH userID and sessionID as keys in the session table so that a user named "Tim" creating the session "demo" does not overlap with someone named "Raja" creating a different session, also called demo. THIS IS A FUTURE TASK, not something we need to deal with right now.
 /*
  * function to get id of the user
  */
-
 function getUserid($session){
 
     $db = connection();
@@ -181,14 +187,11 @@ function getUserid($session){
 
 }
 
-/*
- * Get user actions based on provided session hash
- */
 
 function response_in_process(){
 
 
-    $session   = $_REQUEST['session'];
+    $session   = $_REQUEST['user'];
 
     $user_id = getUserid($session);
 
@@ -199,7 +202,7 @@ function response_in_process(){
 
 function response_processed(){
 
-    $session   = $_REQUEST['session'];
+    $session   = $_REQUEST['user'];
 
     $user_id = getUserid($session);
 
@@ -214,6 +217,30 @@ function get_user_actions($userid,$status){
 
     $sth = $db->prepare("SELECT * FROM actions WHERE action_userid=:sessionName and action_status=:status LIMIT 30");
     $sth->execute(array(':sessionName'=>$userid,':status'=>$status));
+
+    $data =  array();
+
+        while (false !== ($row = $sth->fetch(PDO::FETCH_ASSOC, $cursor))) {
+
+            $cursor = PDO::FETCH_ORI_NEXT;
+            $data[] = $row;
+
+        }
+
+    return $data;
+
+}
+
+/*
+ * Get user actions based on provided session hash
+ */
+
+function get_session_actions($session){
+
+    $db = connection();
+
+    $sth = $db->prepare("SELECT * FROM actions WHERE action_session=:session LIMIT 30");
+    $sth->execute(array(':session'=>$session));
 
     $data =  array();
 
