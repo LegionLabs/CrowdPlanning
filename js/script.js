@@ -2,6 +2,9 @@
  * Created by apple on 10/11/14.
  */
 
+var session = gup('session') ? gup('session') : "DEFAULT_SESSION";
+var user = gup('user') ? gup('user') : "DEFAULT_USER";
+
 $(document).ready(function(){
 
     load_simple();
@@ -38,7 +41,7 @@ function add_new_action_active(id){
     $.ajax({
         url: "ajax_requests.php",
         type: "POST",
-        data : { 'action' : 'update_action' , 'value' : id , 'user' :gup('session')  },
+        data : { 'action' : 'update_action' , 'value' : id , 'session': session, 'user': user  },
         context: document.body,
         cache: false,
         async: false,
@@ -73,7 +76,7 @@ function load_simple(){
     $.ajax({
         url: "ajax_requests.php",
         type: "POST",
-        data : { 'action' : 'load_simple' , 'user' :gup('session')  },
+        data : { 'action' : 'load_simple' , 'user': session  },
         context: document.body,
         cache: false,
         async: false,
@@ -112,7 +115,7 @@ function load_proccessed(){
     $.ajax({
         url: "ajax_requests.php",
         type: "POST",
-        data : { 'action' : 'load_proccessed' , 'user' :gup('session')  },
+        data : { 'action' : 'load_proccessed' , 'session': session, 'user': user  },
         context: document.body,
         cache: false,
         async: false,
@@ -157,7 +160,7 @@ function add_new_action(){
     $.ajax({
         url: "ajax_requests.php",
         type: "POST",
-        data : { 'action' : 'save_action' , 'value' : suggested_value , 'user' :gup('session')  },
+        data : { 'action' : 'save_action' , 'value' : suggested_value , 'session': session, 'user': user  },
         context: document.body,
         cache: false,
         async: false,
