@@ -76,7 +76,7 @@ function load_simple(){
     $.ajax({
         url: "ajax_requests.php",
         type: "POST",
-        data : { 'action' : 'load_simple' , 'user': session  },
+        data : { 'action' : 'load_simple' , 'session': session, 'user': user  },
         context: document.body,
         cache: false,
         async: false,

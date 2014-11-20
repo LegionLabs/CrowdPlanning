@@ -13,12 +13,13 @@ include_once('./php/_db.php');
 
 date_default_timezone_set('America/New_York');
 
-
 $action = $_REQUEST['action'];
 
-if( !empty($action) ){
+
+if(!empty($action)){
 
     switch($action){
+
         case 'save_action':
             user_action_save();
             break;
@@ -31,11 +32,13 @@ if( !empty($action) ){
         case 'load_proccessed':
             response_processed();
             break;
+
     }
 
-}
-else{
+}else{
+
     json_response(true,'Action missing please provide action');
+
 }
 
 /*
@@ -60,11 +63,16 @@ function json_response($error,$msg){
  */
 function user_action_save(){
 
-    $length    = 50;
-    $action    = $_REQUEST['value'];
-    $session   = $_REQUEST['session'];
-    $date      = strtotime(date('H:i:s')) ;
-    $user = $_REQUEST['user'];
+    $length      = 50;
+    $action      = $_REQUEST['value'];
+    $user_name   = $_REQUEST['user'];
+    $date        = strtotime(date('H:i:s')) ;
+
+    if( isset($_REQUEST['user']) ) {
+        $user_name = $_REQUEST['user'];
+    }else {
+        $user_name = 'DEFAULT';
+    }
 
     if(!empty($action)){
 
@@ -76,26 +84,26 @@ function user_action_save(){
 
         }
 
-/*
-        $user_id = getUserid($session);
+        /*
+                $user_id = getUserid($session);
 
-        if($user_id != false){
+                if($user_id != false){
 
-        }else{
-            json_response(true,'user sessions doesnt exists!');
-        }
-*/
+                }else{
+                    json_response(true,'user sessions doesnt exists!');
+                }
+        */
 
-        // WSL: For now, don't worry about the prior user sessions.
 
-        $sth = $db->prepare("INSERT INTO actions (action_name, action_datetime, action_status, action_session, action_userid) VALUES(:action_name,:action_datetime,:action_status,:action_session,:action_userid)");
-        $result = $sth->execute(array(':action_name' => $action, ':action_datetime' => $date, ':action_status' => 1, ':action_session'=>$session, ':action_userid' => $user));
+            $sth = $db->prepare("INSERT INTO actions (action_name, action_datetime, action_status, action_userid) VALUES(:action_name,:action_datetime,:action_status,:action_userid)");
+            $result = $sth->execute(array(':action_name' => $action, ':action_datetime' => $date, ':action_status' => 0, ':action_userid' => $user_name));
 
-        if($result){
-            $data = get_session_actions($session);
-            json_response(false,$data);
-        }
+            if($result){
 
+                $data = get_user_actions($user_name,0);
+                json_response(false,$data);
+
+            }
 
     }else{
         json_response(true,'value missing please provide value!');
@@ -110,30 +118,33 @@ function user_action_save_step2(){
 
     $length    = 50;
     $action    = $_REQUEST['value'];
-    $session   = $_REQUEST['session'];
-    $user   = $_REQUEST['user'];
+    $session   = $_REQUEST['user'];
     $date      = strtotime(date('H:i:s')) ;
 
     if(!empty($action)){
 
         $db      = connection();
 
-            $sth = $db->prepare("UPDATE actions set action_status = :status where action_id = :action_id_passed and action_session=:action_session");
-            $result = $sth->execute(array(':status' => 1, ':action_id_passed' => $action, ':action_session' => $session));
+        if( isset($_REQUEST['user']) ) {
+            $user_name = $_REQUEST['user'];
+        }else {
+            $user_name = 'DEFAULT';
+        }
+
+            $sth = $db->prepare("UPDATE actions set action_status = :status where action_id = :action_id_passed");
+            $result = $sth->execute(array(':status' => 1, ':action_id_passed' => $action));
 
             if($result){
 
-                //$data = get_user_actions($user,1);
-                $data = get_session_actions($session,1);
+                $data = get_user_actions($user_name,1);
                 json_response(false,$data);
             }
 
 
-    }
-    else{
+    }else{
             json_response(true,'value missing please provide value!');
+        }
     }
-}
 
 
 /*
@@ -143,35 +154,6 @@ function user_action_save_step2(){
 function connection(){
 
     return load_database('./');
-
-}
-
-// WSL: New
-function response_in_process(){
-
-
-    $session   = $_REQUEST['session'];
-    $user = $_REQUEST['user'];
-
-    $user_id = getUserid($user);
-
-    //$data = get_user_actions($user_id,0);
-    $data = get_session_actions($session,0);
-    json_response(false,$data);
-
-}
-
-function response_processed(){
-
-    $session   = $_REQUEST['session'];
-    $user   = $_REQUEST['user'];
-
-    $user_id = getUserid($user);
-
-
-    //$data = get_user_actions($user_id,1);
-    $data = get_session_actions($session,1);
-    json_response(false,$data);
 
 }
 
@@ -206,13 +188,35 @@ function getUserid($session){
 }
 
 
-// WSL: New
+function response_in_process(){
+
+
+    $session   = $_REQUEST['user'];
+
+    $user_id = getUserid($session);
+
+    $data = get_user_actions($user_id,0);
+    json_response(false,$data);
+
+}
+
+function response_processed(){
+
+    $session   = $_REQUEST['user'];
+
+    $user_id = getUserid($session);
+
+    $data = get_user_actions($user_id,1);
+    json_response(false,$data);
+
+}
+
 function get_user_actions($userid,$status){
 
     $db = connection();
 
-    $sth = $db->prepare("SELECT * FROM actions WHERE action_userid=:userName and action_status=:status LIMIT 30");
-    $sth->execute(array(':userName'=>$userid,':status'=>$status));
+    $sth = $db->prepare("SELECT * FROM actions WHERE action_userid=:sessionName and action_status=:status LIMIT 30");
+    $sth->execute(array(':sessionName'=>$userid,':status'=>$status));
 
     $data =  array();
 
@@ -227,8 +231,6 @@ function get_user_actions($userid,$status){
 
 }
 
-
-// WSL-TODO: Figure out if we need to track based on status here!
 /*
  * Get user actions based on provided session hash
  */
