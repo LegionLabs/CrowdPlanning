@@ -45,3 +45,29 @@ body{
 {
     margin-top: 5px;
 }
+.ul_styler
+{
+    float: left;
+
+}
+ul{
+    margin: 0 !important;
+    padding: 0 !important;
+
+}
+#ul_styler li{
+    list-style: none;
+    margin-top: 2px;
+    border:1px solid #222222;;
+    padding: 2px;
+}
+#input_add{
+    margin-top: 5px;
+}
+#action_library
+{
+    margin-top: 10px;
+}
+#action_library input{
+    margin: 2px;
+}
