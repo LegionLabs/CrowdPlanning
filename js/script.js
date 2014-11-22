@@ -197,7 +197,8 @@ function add_new_action(){
 
 // Create new action button string
 function getActionHtmlElem(nameStr, type) {
-    return '<input type="button" id="' + nameStr + '_lib-btn' + '" class="alert alert-success" draggable="true" ondragstart="drag(event)" value="' + nameStr + '" />';
+    //return '<input type="button" id="' + nameStr + '_lib-btn' + '" class="action alert alert-success" draggable="true" ondragstart="drag(event)" value="' + nameStr + '" />';
+    return '<input type="button" id="' + nameStr + '_lib-btn' + '" class="action" draggable="true" ondragstart="drag(event)" value="' + nameStr + '" />';
 }
 
 //original function starts

@@ -20,7 +20,7 @@
 
             <div class="col-lg-6 col-sm-6 col-xs-6 border overall-margin">
 
-                <div class="inner-container" id="current_plan" ondragover="allowDrop(event)">
+                <div class="inner-container" id="current_plan" ondrop="drop(event)" ondragover="allowDrop(event)">
                 </div>
                 <div class="bottom-text">
                     <p class="mrg">Current Plan</p>
