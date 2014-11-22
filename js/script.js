@@ -7,6 +7,7 @@ var user = gup('user') ? gup('user') : "DEFAULT_USER";
 
 $(document).ready(function(){
 
+
     load_simple();
     load_proccessed();
 
@@ -24,13 +25,41 @@ $(document).ready(function(){
 
     $(document).on('click','#add_left',function(){
 
-
         var d_id = $(this).data('d_id');
         var html = $("#pr_"+d_id).html();
         $("#pr_"+d_id).remove();
         $("#action_library").append(html);
 
         add_new_action_active(d_id);
+
+    });
+
+    /*
+     * drop event working
+     */
+
+    $("#current_plan").on("drop", function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var inputs = $('#current_plan input');
+
+        var base = $('#base_url').val();
+
+        $(inputs).each(function() {
+
+            var button = '<img class="arroundstyler" src="./images/icon_small-arrow.png" id="helper" />';
+
+            console.log($(this).prop('id'));
+
+            var type = $(this).prop('id');
+            var type1 = $(this).next().prop('id');
+
+            if(type1 != 'helper' && type != 'helper' && type1 != ''){
+                $(button).insertAfter($(this));
+            }
+
+        });
 
     });
 
@@ -53,7 +82,7 @@ function add_new_action_active(id){
                 var html = '';
 
                 for(var k=0;k<data.msg.length;k++){
-                    html += getActionHtmlElem(data.msg[k]['action_name']);
+                    html += getActionHtmlElem(data.msg[k]['lib_name']);
 
                 }
 
@@ -128,7 +157,7 @@ function load_proccessed(){
 
                 for(var k=0;k<data.msg.length;k++){
                     //html +='<input type="button" class="alert alert-success" value="'+data.msg[k]['action_name']+'" />';
-                    html += getActionHtmlElem(data.msg[k]['action_name']);
+                    html += getActionHtmlElem(data.msg[k]['lib_name']);
 
                 }
 

@@ -76,15 +76,15 @@ function user_action_save(){
 
         }
 
-/*
-        $user_id = getUserid($session);
+        /*
+                $user_id = getUserid($session);
 
-        if($user_id != false){
+                if($user_id != false){
 
-        }else{
-            json_response(true,'user sessions doesnt exists!');
-        }
-*/
+                }else{
+                    json_response(true,'user sessions doesnt exists!');
+                }
+        */
 
         // WSL: For now, don't worry about the prior user sessions.
 
@@ -111,27 +111,27 @@ function user_action_save_step2(){
     $length    = 50;
     $action    = $_REQUEST['value'];
     $session   = $_REQUEST['session'];
-    $user   = $_REQUEST['user'];
+    $user      = $_REQUEST['user'];
     $date      = strtotime(date('H:i:s')) ;
 
     if(!empty($action)){
 
-        $db      = connection();
+        $db = connection();
 
-            $sth = $db->prepare("UPDATE actions set action_status = :status where action_id = :action_id_passed and action_session=:action_session");
-            $result = $sth->execute(array(':status' => 1, ':action_id_passed' => $action, ':action_session' => $session));
+        $data = get_data_suggestions($action);
 
-            if($result){
+        $sth  = $db->prepare("INSERT INTO libraries (lib_name, lib_datetime, lib_status, lib_session, lib_userid) VALUES(:action_name,:action_datetime,:action_status,:action_session,:action_userid)");
+        $result = $sth->execute(array(':action_name' => $data['action_name'], ':action_datetime' => $data['action_datetime'], ':action_status' => 1, ':action_session'=>$data['action_session'], ':action_userid' => $data['action_userid']));
 
-                //$data = get_user_actions($user,1);
-                $data = get_session_actions($session,1);
-                json_response(false,$data);
-            }
-
+        if($result){
+            $data = get_session_libraries($session);
+            remove_entery_actions($action);
+            json_response(false,$data);
+        }
 
     }
     else{
-            json_response(true,'value missing please provide value!');
+        json_response(true,'value missing please provide value!');
     }
 }
 
@@ -161,6 +161,8 @@ function response_in_process(){
 
 }
 
+
+
 function response_processed(){
 
     $session   = $_REQUEST['session'];
@@ -170,11 +172,35 @@ function response_processed(){
 
 
     //$data = get_user_actions($user_id,1);
-    $data = get_session_actions($session,1);
+    $data = get_session_libraries($session);
     json_response(false,$data);
 
 }
 
+
+function get_data_suggestions($id){
+
+    $db = connection();
+
+    $sth = $db->prepare("SELECT * FROM actions WHERE action_id=:actionid LIMIT 1");
+    $sth->execute(array(':actionid'=>$id));
+
+    $data =  array();
+
+    while (false !== ($row = $sth->fetch(PDO::FETCH_ASSOC, $cursor))) {
+
+        $cursor = PDO::FETCH_ORI_NEXT;
+        $data[] = $row;
+
+    }
+
+    if(is_array($data)){
+        return $data[0];
+    }else{
+        return false;
+    }
+
+}
 
 // WSL-TODO: Instead of getting the userID based on prior sessions (so that we can recover previously-added actions), let's try to get all prior sessions that were created for/by that user. Note that this might require us to use BOTH userID and sessionID as keys in the session table so that a user named "Tim" creating the session "demo" does not overlap with someone named "Raja" creating a different session, also called demo. THIS IS A FUTURE TASK, not something we need to deal with right now.
 /*
@@ -216,12 +242,12 @@ function get_user_actions($userid,$status){
 
     $data =  array();
 
-        while (false !== ($row = $sth->fetch(PDO::FETCH_ASSOC, $cursor))) {
+    while (false !== ($row = $sth->fetch(PDO::FETCH_ASSOC, $cursor))) {
 
-            $cursor = PDO::FETCH_ORI_NEXT;
-            $data[] = $row;
+        $cursor = PDO::FETCH_ORI_NEXT;
+        $data[] = $row;
 
-        }
+    }
 
     return $data;
 
@@ -242,13 +268,49 @@ function get_session_actions($session){
 
     $data =  array();
 
-        while (false !== ($row = $sth->fetch(PDO::FETCH_ASSOC, $cursor))) {
+    while (false !== ($row = $sth->fetch(PDO::FETCH_ASSOC, $cursor))) {
 
-            $cursor = PDO::FETCH_ORI_NEXT;
-            $data[] = $row;
+        $cursor = PDO::FETCH_ORI_NEXT;
+        $data[] = $row;
 
-        }
+    }
 
     return $data;
+
+}
+
+
+function get_session_libraries($session){
+
+    $db = connection();
+
+    $sth = $db->prepare("SELECT * FROM libraries WHERE lib_session=:session LIMIT 30");
+    $sth->execute(array(':session'=>$session));
+
+    $data =  array();
+
+    while (false !== ($row = $sth->fetch(PDO::FETCH_ASSOC, $cursor))) {
+
+        $cursor = PDO::FETCH_ORI_NEXT;
+        $data[] = $row;
+
+    }
+
+    return $data;
+
+}
+
+/*
+ * Remove approved action from actions table
+ */
+
+function remove_entery_actions($id){
+
+    $db = connection();
+
+    $sth = $db->prepare("DELETE FROM actions where action_id =:id");
+    $result = $sth->execute(array(':id' =>$id));
+
+    return $result;
 
 }
