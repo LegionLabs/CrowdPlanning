@@ -6,7 +6,8 @@
     <link   rel="stylesheet" type="text/css" href="./css/bootstrap.min.css">
     <script src="libs/jquery-2.1.0.min.js" type="text/javascript"></script>
     <script src="libs/gup.js" type="text/javascript"></script>
-    <script type="text/javascript" src="./js/script.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
+    <script type="text/javascript" src="js/drag.js"></script>
 
 </header>
 
@@ -19,7 +20,7 @@
 
             <div class="col-lg-6 col-sm-6 col-xs-6 border overall-margin">
 
-                <div class="inner-container">
+                <div class="inner-container" id="current_plan" ondragover="allowDrop(event)">
                 </div>
                 <div class="bottom-text">
                     <p class="mrg">Current Plan</p>

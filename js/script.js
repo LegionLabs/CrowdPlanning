@@ -53,7 +53,7 @@ function add_new_action_active(id){
                 var html = '';
 
                 for(var k=0;k<data.msg.length;k++){
-                    html +='<input type="button" class="alert alert-success" value="'+data.msg[k]['action_name']+'" />';
+                    html += getActionHtmlElem(data.msg[k]['action_name']);
 
                 }
 
@@ -127,7 +127,8 @@ function load_proccessed(){
                 var html = '<ul id="ul_styler">';
 
                 for(var k=0;k<data.msg.length;k++){
-                    html +='<input type="button" class="alert alert-success" value="'+data.msg[k]['action_name']+'" />';
+                    //html +='<input type="button" class="alert alert-success" value="'+data.msg[k]['action_name']+'" />';
+                    html += getActionHtmlElem(data.msg[k]['action_name']);
 
                 }
 
@@ -193,6 +194,11 @@ function add_new_action(){
 
 }
 
+
+// Create new action button string
+function getActionHtmlElem(nameStr, type) {
+    return '<input type="button" id="' + nameStr + '_lib-btn' + '" class="alert alert-success" draggable="true" ondragstart="drag(event)" value="' + nameStr + '" />';
+}
 
 //original function starts
 
